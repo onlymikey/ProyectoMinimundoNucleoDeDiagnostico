@@ -1,9 +1,18 @@
+# Este módulo define todas las ventanas (vistas) para la interfaz de usuario
+# relacionadas con la gestión de pacientes.
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 from decimal import Decimal
 
 # ---------------------- GESTIÓN DE PACIENTES (PARA EMPLEADOS) ----------------------
 def abrir_gestion_pacientes(controller):
+    """
+    Crea y muestra el menú principal para la gestión de pacientes.
+
+    Args:
+        controller: Instancia del controlador de pacientes para manejar la lógica de negocio.
+    """
     ventana_pacientes = tk.Toplevel()
     ventana_pacientes.title("Gestión de Pacientes")
     ventana_pacientes.geometry("400x400")
@@ -19,6 +28,8 @@ def abrir_gestion_pacientes(controller):
     botones_frame = tk.Frame(main_frame, bg='white')
     botones_frame.pack(expand=True)
 
+    # Creación de botones para cada operación CRUD de pacientes.
+    # Se usa lambda para pasar el controlador a la función que abre la ventana correspondiente.
     ttk.Button(botones_frame, text="Registrar paciente", width=30, 
                command=lambda: ventana_registrar_paciente(controller)).pack(pady=8)
     ttk.Button(botones_frame, text="Mostrar paciente por ID", width=30, 
@@ -34,6 +45,12 @@ def abrir_gestion_pacientes(controller):
 
 # ---------------------- REGISTRAR PACIENTE ----------------------
 def ventana_registrar_paciente(controller):
+    """
+    Crea la ventana con el formulario para registrar un nuevo paciente.
+
+    Args:
+        controller: Instancia del controlador de pacientes.
+    """
     win = tk.Toplevel()
     win.title("Registrar paciente")
     win.geometry("500x500")
@@ -44,6 +61,7 @@ def ventana_registrar_paciente(controller):
     labels = ["Nombre", "Dirección", "Teléfono", "Fecha Nac (YYYY-MM-DD)", "Sexo", "Edad", "Estatura"]
     entries = {}
 
+    # Creación dinámica del formulario.
     for i, text in enumerate(labels):
         ttk.Label(main_frame, text=text+":").grid(row=i, column=0, padx=8, pady=8, sticky="e")
         ent = ttk.Entry(main_frame, width=40)
@@ -51,6 +69,7 @@ def ventana_registrar_paciente(controller):
         entries[text] = ent
 
     def guardar():
+        """Recopila los datos del formulario y los envía al controlador."""
         datos = {
             "nombre": entries["Nombre"].get().strip(),
             "direccion": entries["Dirección"].get().strip(),
@@ -70,6 +89,12 @@ def ventana_registrar_paciente(controller):
 
 # ---------------------- MOSTRAR PACIENTE POR ID ----------------------
 def ventana_mostrar_paciente_por_id(controller):
+    """
+    Crea una ventana para buscar un paciente por ID y mostrar su información.
+
+    Args:
+        controller: Instancia del controlador de pacientes.
+    """
     win = tk.Toplevel()
     win.title("Mostrar paciente por ID")
     win.geometry("500x300")
@@ -82,6 +107,7 @@ def ventana_mostrar_paciente_por_id(controller):
     id_entry.grid(row=0, column=1, padx=8, pady=8)
 
     def buscar():
+        """Llama al controlador para buscar el paciente y muestra los datos."""
         id_val = id_entry.get().strip()
         paciente = controller.mostrar_paciente_por_id(id_val)
         
@@ -89,6 +115,7 @@ def ventana_mostrar_paciente_por_id(controller):
             result_frame = tk.Frame(main_frame, relief='sunken', bd=2)
             result_frame.grid(row=2, column=0, columnspan=2, padx=8, pady=8, sticky='we')
             
+            # Muestra los datos en un widget de texto no editable.
             txt = tk.Text(result_frame, width=60, height=8, wrap='word')
             txt.pack(padx=5, pady=5)
             txt.delete("1.0", tk.END)
@@ -99,6 +126,12 @@ def ventana_mostrar_paciente_por_id(controller):
 
 # ---------------------- MOSTRAR TODOS LOS PACIENTES ----------------------
 def ventana_mostrar_todos_pacientes(controller):
+    """
+    Crea una ventana con una tabla para mostrar todos los pacientes.
+
+    Args:
+        controller: Instancia del controlador de pacientes.
+    """
     win = tk.Toplevel()
     win.title("Todos los pacientes")
     win.geometry("900x400")
@@ -106,19 +139,23 @@ def ventana_mostrar_todos_pacientes(controller):
     main_frame = tk.Frame(win)
     main_frame.pack(fill='both', expand=True, padx=10, pady=10)
 
+    # Se utiliza un Treeview para simular una tabla.
     cols = ("codigo","nombre","direccion","telefono","fecha_nac","sexo","edad","estatura")
     tree = ttk.Treeview(main_frame, columns=cols, show="headings")
     
+    # Define las cabeceras de la tabla.
     for c in cols:
         tree.heading(c, text=c.capitalize())
         tree.column(c, width=100, anchor="center")
 
+    # Asocia una barra de desplazamiento al Treeview.
     vsb = ttk.Scrollbar(main_frame, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
     
     tree.pack(side='left', fill='both', expand=True)
     vsb.pack(side='right', fill='y')
 
+    # Obtiene los pacientes del controlador y los añade a la tabla.
     pacientes = controller.mostrar_todos_los_pacientes()
     if pacientes:
         for r in pacientes:
@@ -126,6 +163,12 @@ def ventana_mostrar_todos_pacientes(controller):
 
 # ---------------------- MODIFICAR PACIENTE ----------------------
 def ventana_modificar_paciente(controller):
+    """
+    Crea la ventana para modificar un paciente, cargando sus datos por ID.
+
+    Args:
+        controller: Instancia del controlador de pacientes.
+    """
     win = tk.Toplevel()
     win.title("Modificar paciente")
     win.geometry("500x550")
@@ -138,6 +181,7 @@ def ventana_modificar_paciente(controller):
     id_entry.grid(row=0, column=1, padx=8, pady=8)
 
     def cargar():
+        """Busca un paciente por ID y rellena el formulario de edición con sus datos."""
         id_val = id_entry.get().strip()
         paciente = controller.mostrar_paciente_por_id(id_val)
 
@@ -150,6 +194,7 @@ def ventana_modificar_paciente(controller):
                 ent.grid(row=2+i, column=1, padx=8, pady=6)
                 entries[text] = ent
 
+            # Rellena los campos con los datos existentes.
             entries["Nombre"].insert(0, paciente[1])
             entries["Dirección"].insert(0, paciente[2])
             entries["Teléfono"].insert(0, paciente[3])
@@ -159,6 +204,7 @@ def ventana_modificar_paciente(controller):
             entries["Estatura"].insert(0, str(paciente[7]) if paciente[7] is not None else "")
 
             def guardar_cambios():
+                """Recopila los datos modificados y los envía al controlador."""
                 datos = {
                     "nombre": entries["Nombre"].get().strip(),
                     "direccion": entries["Dirección"].get().strip(),
@@ -181,6 +227,12 @@ def ventana_modificar_paciente(controller):
 
 # ---------------------- ELIMINAR PACIENTE ----------------------
 def ventana_eliminar_paciente(controller):
+    """
+    Crea la ventana para eliminar un paciente por ID.
+
+    Args:
+        controller: Instancia del controlador de pacientes.
+    """
     win = tk.Toplevel()
     win.title("Eliminar paciente")
     win.geometry("400x200")
@@ -193,6 +245,7 @@ def ventana_eliminar_paciente(controller):
     id_entry.grid(row=0, column=1, padx=8, pady=8)
 
     def eliminar():
+        """Pasa el ID del paciente al controlador para su eliminación."""
         id_val = id_entry.get().strip()
         controller.eliminar_paciente(id_val, win)
 
